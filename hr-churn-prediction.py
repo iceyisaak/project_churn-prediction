@@ -15,59 +15,30 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Load data function
-@st.cache_data
-def load_data():
-    try:
-        df = pd.read_csv("HR_Dataset.csv")
-        return df
-    except:
-        # Generate sample data if file doesn't exist
-        data = {
-            'TV': np.random.uniform(10, 300, 200),
-            'radio': np.random.uniform(1, 50, 200),
-            'newspaper': np.random.uniform(0, 120, 200),
-            'sales': np.random.uniform(1, 30, 200)
-        }
-        df = pd.DataFrame(data)
-        return df
-
 
 # Load model function with proper caching and error handling
-# @st.cache_resource
+@st.cache_resource
 
-# def load_model():
-#     model_path = "best_rf_model.pkl"
-#     try:
-#         if not os.path.exists(model_path):
-#             st.error(f"Model file not found: {model_path}")
-#             return None
+def load_model():
+    model_path = "best_rf_model.pkl"
+    try:
+        if not os.path.exists(model_path):
+            st.error(f"Model file not found: {model_path}")
+            return None
         
-#         with open(model_path, "rb") as f:
-#             model = pickle.load(f)
-#         return model
-#     except Exception as e:
-#         st.error(f"Error loading model: {str(e)}")
-#         return None
+        with open(model_path, "rb") as f:
+            model = pickle.load(f)
+        return model
+    except Exception as e:
+        st.error(f"Error loading model: {str(e)}")
+        return None
 
-model = None
 
 # Load Model
-with open('best_rf_model.pkl', 'rb') as f:
-    model = pickle.load(f)
-
-df = load_data()
-# model = load_model()
-
-print("Type of loaded model:", type(model))
-
-##########################
+model = load_model()
+df = pd.read_csv("HR_Dataset.csv")
 
 
-
-
-
-##########################
 
 # Custom CSS for better styling
 st.markdown("""
@@ -121,6 +92,7 @@ with col1:
             value=int(df['number_project'].median()), 
             step=1
         )
+    promotion_last_5years = st.checkbox("Promoted in the last 5 yrs", value=True)
    
 
 with col2:
@@ -147,13 +119,15 @@ input_data = pd.DataFrame({
             'number_project': [number_project],
             'average_montly_hours':[average_montly_hours],
             'time_spend_company':[time_spend_company],
+            'promotion_last_5years':[promotion_last_5years]
         })
 
 
 
-# Prediction with user inputs
-predict = st.button("Predict")
-result = model.predict(input_data)
-if predict :
-    st.success(f"Churn Prediction: {result[0]}")
+if st.button("Predict"):
+    try:
+        result = model.predict(input_data)
+        st.success(f"Churn Prediction: {result[0]}")
+    except Exception as e:
+        st.error(f"Prediction failed: {str(e)}")
     
