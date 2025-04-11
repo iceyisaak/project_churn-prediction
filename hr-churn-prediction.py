@@ -92,7 +92,7 @@ with col1:
             value=int(df['number_project'].median()), 
             step=1
         )
-    promotion_last_5years = st.checkbox("Promoted in the last 5 yrs", value=True)
+    # promotion_last_5years = st.checkbox("Promoted in the last 5 yrs", value=False)
    
 
 with col2:
@@ -119,7 +119,7 @@ input_data = pd.DataFrame({
             'number_project': [number_project],
             'average_montly_hours':[average_montly_hours],
             'time_spend_company':[time_spend_company],
-            'promotion_last_5years':[promotion_last_5years]
+            # 'promotion_last_5years':[promotion_last_5years]
         })
 
 
@@ -127,7 +127,10 @@ input_data = pd.DataFrame({
 if st.button("Predict"):
     try:
         result = model.predict(input_data)
-        st.success(f"Churn Prediction: {result[0]}")
+        if result[0] == 0:
+            st.success(f"Churn Prediction: The employee would be expected to remain.")
+        if result[0] == 1:
+            st.success(f"Churn Prediction: The employee would be expected to quit.")
     except Exception as e:
         st.error(f"Prediction failed: {str(e)}")
     
